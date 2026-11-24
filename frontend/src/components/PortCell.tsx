@@ -1,0 +1,47 @@
+import React from 'react';
+import { extractPortTokens } from '@/services/excelParser';
+
+interface PortCellProps {
+  value: any;
+  isTcp?: boolean;
+  isUdp?: boolean;
+  dictionary: Record<string, string>;
+}
+
+export const PortCell: React.FC<PortCellProps> = ({
+  value,
+  isTcp: _isTcp,
+  isUdp: _isUdp,
+  dictionary,
+}) => {
+  if (!value || String(value).trim() === '-') {
+    return <span className="text-cool-gray-8">—</span>;
+  }
+
+  const tokens = extractPortTokens(String(value));
+  if (tokens.length === 0) {
+    return <span className="text-rao-grey font-mono text-xs">{String(value)}</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap justify-center gap-1.5">
+      {tokens.map((port, idx) => {
+        const match = port.trim().match(/^(\d+(?:\s*[–-]\s*\d+)?)/);
+        const cleanKey = match ? match[1].replace(/\s+/g, '') : '';
+        const hint = dictionary[cleanKey];
+
+        return (
+          <span
+            key={idx}
+            title={hint ? `${port}: ${hint}` : undefined}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-mono transition bg-cool-gray-10/40 text-cool-gray-1 border border-rao-grey/20 ${
+              hint ? 'cursor-help hover:border-brand-cyan' : ''
+            }`}
+          >
+            <span>{port}</span>
+          </span>
+        );
+      })}
+    </div>
+  );
+};
